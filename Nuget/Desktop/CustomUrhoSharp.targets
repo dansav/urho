@@ -1,0 +1,10 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<Binaries Include="$(MSBuildThisFileDirectory)native\*.pak" />
+		<Binaries Include="$(MSBuildThisFileDirectory)native\$(PlatformTarget)\*.dll" />
+		<None Include="@(Binaries)">
+			<Link>%(RecursiveDir)%(FileName)%(Extension)</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+</Project>

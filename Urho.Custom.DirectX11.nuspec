@@ -17,11 +17,16 @@
     <tags>Urho Urho3D UrhoSharp Xamarin 2D 3D games engine</tags>
   </metadata>
   <files>
+    <file src="Nuget/Desktop/CustomUrhoSharp.targets" target="build/UrhoSharp.DirectX11.targets" />
+
     <!--CoreData-->
-    <file src="Urho3D/CoreData.pak" target="native/CoreData.pak" />
-    <!--Windows-->
+    <file src="Urho3D/CoreData.pak" target="build/native/CoreData.pak" />
+
+    <!--Managed-->
     <file src="Bin/Desktop/Urho.dll" target="lib/net45/Urho.dll" />
-    <file src="Bin/Desktop/Win64/mono-urho-d3d.dll" target="runtimes/win-x64/native/mono-urho.dll" />
-    <!-- <file src="Bin/Desktop/Win32/mono-urho-d3d.dll" target="runtimes/win-x86/native/mono-urho.dll" /> -->
+
+    <!--Native-->
+    <file src="Bin/Desktop/Win64/mono-urho-d3d.dll" target="build/native/x64/mono-urho.dll" />
+    <!-- <file src="Bin/Desktop/Win32/mono-urho-d3d.dll" target="build/native/x86/mono-urho.dll" /> -->
   </files>
 </package>

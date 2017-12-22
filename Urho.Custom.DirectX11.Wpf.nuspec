@@ -15,7 +15,7 @@
 	   <releaseNotes></releaseNotes>
        <tags>Urho Urho3D Wpf UrhoSharp Xamarin 2D 3D games engine</tags>
        <dependencies>
-         <dependency id="UrhoSharp.DirectX11" version="1.8-pre0001" />
+         <dependency id="UrhoSharp.DirectX11" version="$depver$" />
        </dependencies>
    </metadata>
    <files>

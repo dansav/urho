@@ -5,40 +5,51 @@
 set "CONFIG=%~1"
 
 if "%CONFIG%" == "" echo ERROR: CONFIG is not set, example of usage: "MakeWindows.bat Release" && pause && exit /b
-
 set "URHO3D_SRC_DIR=Urho3D/Source"
+
 set MSBUILD="C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\MSBuild\15.0\Bin\MSBuild.exe"
 
-rmdir bin\Desktop /s /q 2>NUL
-rmdir bin\nugets /s /q 2>NUL
-del Urho3D\Urho3D_Windows\lib\*.lib 2>NUL
+set NUGET_VERSION=1.8.0-pre0007
 
+:main
+call :task-clean
 ::@echo on
-
-rem can not get x86 to build right now...
-::call :buildNative x86
-call :buildNative x64
-
-:: build .NET bindings for Desktop framework
-%MSBUILD% Bindings\Desktop\Urho.Desktop.csproj /p:Configuration=%CONFIG% /p:Platform=AnyCPU
-
-:: build WPF extension
-%MSBUILD% Extensions\Urho.Extensions.Wpf\Urho.Extensions.Wpf.csproj /p:Configuration=%CONFIG% /p:Platform=AnyCPU
-
-:: download nuget
-if not exist "bin\nuget.exe" (
-    echo Downloading nuget.exe...
-    powershell -command "& { (New-Object Net.WebClient).DownloadFile('https://dist.nuget.org/win-x86-commandline/latest/nuget.exe', 'bin\\nuget.exe') }"
-)
-
-:: build nuget packages
-mkdir bin\nugets
-bin\nuget.exe pack Urho.Custom.OpenGL.nuspec -OutputDirectory bin\nugets
-bin\nuget.exe pack Urho.Custom.OpenGL.Wpf.nuspec -OutputDirectory bin\nugets
-bin\nuget.exe pack Urho.Custom.DirectX11.nuspec -OutputDirectory bin\nugets
-bin\nuget.exe pack Urho.Custom.DirectX11.Wpf.nuspec -OutputDirectory bin\nugets
-
+call :task-buildnative
+call :task-buildmanaged
+call :task-package
 goto :eof
+
+:: --------------------------------------------------------------------------------------------------------------------
+:: Main build tasks
+:: --------------------------------------------------------------------------------------------------------------------
+
+:task-clean
+    rmdir bin\Desktop /s /q 2>NUL
+    rmdir bin\nugets /s /q 2>NUL
+    del Urho3D\Urho3D_Windows\lib\*.lib 2>NUL
+goto :eof
+
+:task-buildnative
+    rem can not get x86 to build right now...
+    ::call :buildNative x86
+    call :buildNative x64
+goto :eof
+
+:task-buildmanaged
+    :: build .NET bindings for Desktop framework
+    %MSBUILD% Bindings\Desktop\Urho.Desktop.csproj /p:Configuration=%CONFIG% /p:Platform=AnyCPU
+
+    :: build WPF extension
+    %MSBUILD% Extensions\Urho.Extensions.Wpf\Urho.Extensions.Wpf.csproj /p:Configuration=%CONFIG% /p:Platform=AnyCPU
+goto :eof
+
+:task-package
+    call :buildNugets %NUGET_VERSION%
+goto :eof
+
+:: --------------------------------------------------------------------------------------------------------------------
+:: sub routines
+:: --------------------------------------------------------------------------------------------------------------------
 
 :prepareBuildFiles
     set renderflags=%1
@@ -88,3 +99,18 @@ goto :eof
     popd
 goto :eof
 
+:buildNugets
+    :: download nuget
+    if not exist "bin\nuget.exe" (
+        echo Downloading nuget.exe...
+        powershell -command "& { (New-Object Net.WebClient).DownloadFile('https://dist.nuget.org/win-x86-commandline/latest/nuget.exe', 'bin\\nuget.exe') }"
+    )
+
+    :: build nuget packages
+    set VERSION=%1
+    mkdir bin\nugets
+    bin\nuget.exe pack Urho.Custom.OpenGL.nuspec -OutputDirectory bin\nugets -Version %VERSION% -Properties depver=%VERSION%
+    bin\nuget.exe pack Urho.Custom.OpenGL.Wpf.nuspec -OutputDirectory bin\nugets -Version %VERSION% -Properties depver=%VERSION%
+    bin\nuget.exe pack Urho.Custom.DirectX11.nuspec -OutputDirectory bin\nugets -Version %VERSION% -Properties depver=%VERSION%
+    bin\nuget.exe pack Urho.Custom.DirectX11.Wpf.nuspec -OutputDirectory bin\nugets -Version %VERSION% -Properties depver=%VERSION%
+goto :eof
